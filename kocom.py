@@ -636,7 +636,31 @@ def publish_discovery(dev, sub=''):
         if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
             logging.info(logtxt)
     elif dev == 'light':
-        for num in range(1, int(config.get('User', 'light_count'))+1):
+        for num in range(1, 2):
+            #ha_topic = 'homeassistant/light/kocom_livingroom_light1/config'
+            topic = 'homeassistant/light/kocom_{}_light{}/config'.format(sub, num)
+            payload = {                         
+                'name': 'Kocom {} Light{}'.format(sub, num),                               
+                'cmd_t': 'kocom/{}/light/{}/command'.format(sub, num),
+                'stat_t': 'kocom/{}/light/state'.format(sub),
+                'stat_val_tpl': '{{ value_json.light_' + str(num) + ' }}',
+                'pl_on': 'on',         
+                'pl_off': 'off',                        
+                'qos': 0,                                                                      
+                'uniq_id': '{}_{}_{}{}'.format('kocom', 'wallpad', dev, num),
+                'device': {           
+                    'name': '...... ......... .........',
+                    'ids': 'kocom_smart_wallpad',
+                    'mf': 'KOCOM',                         
+                    'mdl': '......... .........',                 
+                    'sw': SW_VERSION                                                                                                           
+                }                        
+            }                                   
+            logtxt='[MQTT Discovery|{}{}] data[{}]'.format(dev, num, topic)
+            mqttc.publish(topic, json.dumps(payload))
+            if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
+                logging.info(logtxt)  
+        for num in range(3, int(config.get('User', 'light_count'))+1):
             #ha_topic = 'homeassistant/light/kocom_livingroom_light1/config'
             topic = 'homeassistant/light/kocom_livingroom_light{}/config'.format(num)
             payload = {
@@ -675,7 +699,7 @@ def publish_discovery(dev, sub=''):
             'curr_temp_t': 'kocom/room/thermo/{}/state'.format(num),
             'curr_temp_tpl': '{{ value_json.cur_temp }}',
             'modes': ['off', 'heat'],
-            'min_temp': 20,
+            'min_temp': 10,
             'max_temp': 25,
             'ret': 'false',
             'qos': 0,
